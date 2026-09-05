@@ -267,21 +267,44 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 /* --------------------------------------------------------------------------
    05. Header
    -------------------------------------------------------------------------- */
+/*
+ * IMPORTANT: .site-header itself must never receive `transform`, `filter`,
+ * `backdrop-filter`, `perspective`, or `will-change: transform`. Any of
+ * those turn the header into the containing block for EVERY `position:
+ * fixed` descendant inside it (including .primary-nav, the mobile menu
+ * panel) — instead of sizing against the full viewport, the fixed panel
+ * would then size against the header's own ~76px-tall box and get
+ * clipped down to almost nothing. The frosted-glass blur is applied on
+ * the ::before pseudo-element below instead, so .site-header stays a
+ * plain sticky/z-index box and .primary-nav keeps positioning against
+ * the viewport correctly.
+ */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 500;
+  isolation: isolate;
+}
+
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   background: rgba(4, 15, 38, 0.92);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: box-shadow var(--transition-base), background var(--transition-base);
+  pointer-events: none;
 }
 
-.site-header.is-scrolled {
+.site-header.is-scrolled::before {
   box-shadow: 0 8px 24px rgba(4, 15, 38, 0.25);
 }
 
 .header-inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
