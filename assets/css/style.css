@@ -565,7 +565,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 
 .hero-visual-card h3 { color: var(--color-white); margin-bottom: var(--space-2xs); }
-.hero-visual-card p { margin: 0; }
+.hero-visual-card p { margin: 0; color: var(--text-on-dark-muted); }
 
 /* --------------------------------------------------------------------------
    07. Value / Trust strip
@@ -1020,7 +1020,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 
 .footer-brand .brand { margin-bottom: var(--space-sm); }
-.footer-brand p { max-width: 34ch; }
+.footer-brand p { max-width: 34ch; color: var(--text-on-dark-muted); }
 
 .footer-col h4 {
   font-family: var(--font-heading);
@@ -1045,6 +1045,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   padding-top: var(--space-lg);
   font-size: var(--fs-small);
 }
+.footer-bottom p { color: var(--text-on-dark-muted); }
 
 /* --------------------------------------------------------------------------
    16. Floating WhatsApp button
@@ -1096,7 +1097,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 
 .page-hero h1 { color: var(--color-white); margin-bottom: var(--space-sm); }
-.page-hero p { max-width: 60ch; margin-inline: auto; }
+.page-hero p { max-width: 60ch; margin-inline: auto; color: var(--text-on-dark-muted); }
 
 /* --------------------------------------------------------------------------
    19. Pricing cards (Paquetes)
