@@ -12,23 +12,26 @@ Stack: vanilla HTML5 / CSS3 / JavaScript. No frameworks, no build step, no depen
 belta-site/
 ├── index.html              Home — hero, services overview, differentiators, process, reviews, CTA
 ├── services.html           Detailed services + FAQ (mandatory conversion modules)
-├── contact.html            Contact form (→ WhatsApp) + direct contact methods
+├── packages.html           Pricing/packages page (added Sept 2026 — see §7)
+├── contact.html            Contact form (→ Google Sheets + WhatsApp) + direct contact methods
 ├── privacy-policy.html     Legal — placeholder content, ready for final copy
 ├── terms.html               Legal — placeholder content, ready for final copy
 ├── robots.txt
 ├── sitemap.xml
+├── google-apps-script/
+│   └── Code.gs              Apps Script for the Google Sheets lead log (see §7)
 ├── assets/
 │   ├── css/
 │   │   └── style.css       Single stylesheet, token-based design system
 │   ├── js/
-│   │   └── main.js         Mobile nav, sticky header, FAQ accordion, WhatsApp form redirect, footer year
+│   │   └── main.js         Mobile nav, sticky header, FAQ accordion, contact form (Sheets + WhatsApp), footer year
 │   ├── images/
 │   │   └── logo/           Client logo resources (see §3)
 │   └── icons/               PROL official icon library references (see §4 — pending integration)
 └── README.md                This file
 ```
 
-Multi-page architecture per PROL_PROFESIONAL_v3 (3 primary pages: index, services, contact — legal pages don't count toward the limit).
+Multi-page architecture per PROL_PROFESIONAL_v3 (4 primary pages as of Sept 2026: index, services, packages, contact — legal pages don't count toward the limit).
 
 ---
 
@@ -40,7 +43,8 @@ Every content decision traces back to `Belta_Production_Brief.md` and `Belta_Man
 - **Services list:** Meta Ads, Google Ads, TikTok Ads, UGC content, website creation, online store, community management — all six from the brief's "All Services".
 - **Target audience call-outs:** car dealerships and health-sector marketers, per "Customer Segments".
 - **Differentiators:** full-funnel / one-team positioning and CPL/leads/ROI focus, sourced from the brand manual's philosophy and tone-of-voice sections.
-- **Reviews section:** included because the brief explicitly lists "Reseñas" as mandatory content, but no real testimonials were submitted — see §5.
+- **Reviews section:** included because the brief explicitly lists "Reseñas" as mandatory content, but no real testimonials were submitted — see §5. Since Sept 2026 it no longer has its own nav tab (replaced by "Paquetes" per client request) but still lives on the homepage at `index.html#resenas`, reachable via footer/scroll — nothing was deleted, only unlinked from the primary nav.
+- **Packages/pricing:** added Sept 2026 from a client-supplied draft (`Belta_Paquetes_Draft.html`) — content and prices are the client's own, adapted into the site's existing `.pricing-*` design-system components rather than the draft's inline styles. See §7.
 - **Design system:** colors (`#040F26` navy, `#05ADC9` turquoise, `#22C7A7` green) and typography (Poppins / Inter) taken directly from the brand manual.
 
 No business claims, statistics, certifications, or testimonials were invented anywhere in the project.
@@ -86,7 +90,26 @@ These require a decision from Belta before final publication (documented in the 
 
 ## 6. Technical notes
 
-- **Forms:** the contact form redirects to WhatsApp with a pre-filled message (no backend). The WhatsApp number (`+54 9 351 315-8317`) is centralized in `assets/js/main.js` (`WHATSAPP_NUMBER`) and in each `wa.me` link in the HTML.
+- **Forms:** the contact form redirects to WhatsApp with a pre-filled message, and (once configured — see §7) also logs the lead to a Google Sheet. The WhatsApp number (`+54 9 351 342-6418`) is centralized in `assets/js/main.js` (`WHATSAPP_NUMBER`) and in each `wa.me` link in the HTML.
 - **Accessibility:** semantic HTML5 landmarks, skip link, visible focus states, keyboard-operable nav/FAQ, `prefers-reduced-motion` respected.
 - **Performance:** no JS frameworks, no icon sprite build step, fonts loaded with `preconnect`, images pre-sized for their contexts.
 - **SEO:** per-page metadata + Open Graph, canonical URLs, `robots.txt` + `sitemap.xml` included, legal pages set to `noindex, follow`.
+
+---
+
+## 7. September 2026 revision round
+
+Client-requested changes, applied across the site:
+
+- **Nav:** "Reseñas" replaced by "Paquetes" in the primary nav and footer nav on every page (the Reseñas section itself stays on the homepage, just unlinked from the top nav — see §2).
+- **New page — `packages.html`:** built from the client's `Belta_Paquetes_Draft.html` reference. Kept the draft's content and hierarchy (4 tiers: Pack Meta, Pack Google, Full Funnel — featured, Scale) but rebuilt it with the site's own `.pricing-*` components in `style.css` instead of the draft's inline styles, so it matches the rest of the site's design system. Every "Consultar" CTA points to `contact.html`, not WhatsApp, per the draft's own foot-note instruction.
+- **Contact updated everywhere:** WhatsApp number is now `+54 9 351 342-6418` and email is `digitallbelta@gmail.com` (header/footer CTAs, contact page, floating WhatsApp button, `mailto:` links).
+- **Contact form:** added "Rubro / industria" (dropdown: Automotor, Salud, Construcción, Inmobiliario, Otro — matching the site's own stated verticals) and "Ciudad o zona" (free text) fields. Both are required, alongside the existing Nombre, Empresa and Servicio de interés fields.
+- **Contact section contrast fix:** the contact form card is white-on-white against the plain `.section` background, which is the most likely source of the "no contrastan bien" report — added `.section--soft` (off-white) to that section so the white form card and the navy contact-info card both read with clear separation.
+- **Lead destinations:** the form still redirects to WhatsApp with the message pre-filled (now including rubro and zona), and additionally does a `fetch()` to a Google Apps Script Web App that appends the lead as a row in a Google Sheet.
+  - **Placeholder sheet (provisional):** PROL created [`Clientes Belta - Formularios enviados`](https://docs.google.com/spreadsheets/d/1gQ450gzZFKb8a8qV_c832e3sA9zQ3LIjeuBkDI3wIbM/edit) to use until Belta shares their definitive sheet. Note for whoever picks this up: **the spreadsheet link itself is not what goes into the code** — `GOOGLE_SHEETS_ENDPOINT` needs the URL you get after deploying `google-apps-script/Code.gs` as a Web App from *inside* that sheet's Apps Script editor (Extensiones → Apps Script → Implementar). Full click-by-click steps are in `Code.gs`'s header comment. Pasting the raw `docs.google.com/.../edit` link there would silently do nothing (the fetch uses `mode:'no-cors'`, so it fails quietly instead of throwing an error).
+  - **Still pending:** deploying the script (needs a human to click through Google's authorization screen — can't be scripted) and pasting the resulting `.../exec` URL into `assets/js/main.js`. Until that's done, `GOOGLE_SHEETS_ENDPOINT` stays empty and the form keeps working exactly as before (WhatsApp only) — no lead is lost either way. When Belta's real sheet arrives, repeat the same deploy steps there and swap the URL.
+- **WhatsApp alert on new lead:** stubbed as a commented-out example (CallMeBot) inside `Code.gs`, since no WhatsApp-alert provider or credentials were supplied. Needs Belta to pick a provider before it can be turned on.
+- **Footer signature removed:** the "creado por PROL" / infrastructure credit line was removed from the footer on every page, per explicit client instruction. **Flag for PROL:** this is a deviation from PROL_BASE's standard footer requirement (§ mandatory footer groups) — it costs PROL a backlink/attribution on every delivered site. Worth a quick internal conversation about whether this should be a standard negotiable in future contracts, but the removal itself was executed as instructed.
+- **Brand-color consistency:** the small trust/stat badges (hero "+3 años de experiencia", etc.) and the "check" icons used across differentiators/services now use a CSS-only `.check-dot` / plain "✓" treatment in the brand gradient, instead of depending on icon-library files that were never delivered (see `assets/icons/README.md`).
+- **Header layout bug (post-delivery fix):** the centered-logo grid trick had `.brand` (column 2) placed *before* the nav/CTA (columns 1 and 3) in the HTML. CSS Grid's auto-placement treats a "backwards" column jump as a signal to start a new row, so the logo silently landed on its own row above the nav — not visible in the review pass, only caught from a client screenshot. Fixed by adding explicit `grid-row: 1` to `.brand`, `.primary-nav__list`, `.header-cta` and `.nav-toggle` in `style.css`. Worth remembering for any future header built with this same out-of-DOM-order grid-column pattern.

@@ -100,10 +100,21 @@
   }
 
   /* ------------------------------------------------------------------------
-     Contact form → WhatsApp redirect
+     Contact form → Google Sheets + WhatsApp redirect
+
+     GOOGLE_SHEETS_ENDPOINT: URL del Google Apps Script Web App que recibe
+     el lead y lo agrega como fila nueva en la planilla. Ver
+     /google-apps-script/Code.gs para el script desplegado y las
+     instrucciones de instalación.
+
+     Apunta hoy a la planilla PLACEHOLDER de PROL ("Clientes Belta -
+     Formularios enviados") mientras Belta define su planilla definitiva.
+     Cuando la compartan, repetir el deploy de Code.gs ahí y reemplazar
+     esta URL por la nueva.
      ------------------------------------------------------------------------ */
   var contactForm = document.getElementById('contact-form');
-  var WHATSAPP_NUMBER = '5493513158317';
+  var WHATSAPP_NUMBER = '5493513426418';
+  var GOOGLE_SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw5mV6QqOj4kgAl91f7uDmNyDdwQ6_uhzI3ymxhb932maGxbK-N-4KJwbLZvfGOk95f/exec';
 
   if (contactForm) {
     contactForm.addEventListener('submit', function (event) {
@@ -112,16 +123,44 @@
       var name = (contactForm.elements['name'].value || '').trim();
       var business = (contactForm.elements['business'].value || '').trim();
       var service = (contactForm.elements['service'].value || '').trim();
+      var industry = (contactForm.elements['industry'].value || '').trim();
+      var city = (contactForm.elements['city'].value || '').trim();
       var message = (contactForm.elements['message'].value || '').trim();
 
-      if (!name || !business || !service) {
+      if (!name || !business || !service || !industry || !city) {
         contactForm.reportValidity();
         return;
       }
 
+      // 1) Registrar el lead en Google Sheets (fire-and-forget, no bloquea
+      //    el redirect a WhatsApp aunque la planilla no esté conectada aún).
+      if (GOOGLE_SHEETS_ENDPOINT) {
+        try {
+          fetch(GOOGLE_SHEETS_ENDPOINT, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: name,
+              business: business,
+              service: service,
+              industry: industry,
+              city: city,
+              message: message,
+              date: new Date().toISOString()
+            })
+          });
+        } catch (err) {
+          // Silencioso: si falla el envío a la planilla, el lead igual
+          // llega por WhatsApp.
+        }
+      }
+
+      // 2) Redirigir a WhatsApp con el mensaje ya armado.
       var lines = [
         'Hola Belta, soy ' + name + ' de ' + business + '.',
-        'Me interesa el servicio de: ' + service + '.'
+        'Me interesa el servicio de: ' + service + '.',
+        'Rubro: ' + industry + ' — Zona: ' + city + '.'
       ];
 
       if (message) {
