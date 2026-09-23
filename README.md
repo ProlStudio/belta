@@ -18,6 +18,7 @@ belta-site/
 ├── terms.html               Legal — placeholder content, ready for final copy
 ├── robots.txt
 ├── sitemap.xml
+├── vercel.json              Clean URLs config (see §8) — required for hosting on Vercel
 ├── google-apps-script/
 │   └── Code.gs              Apps Script for the Google Sheets lead log (see §7)
 ├── assets/
@@ -115,3 +116,15 @@ Client-requested changes, applied across the site:
 - **Header layout bug (post-delivery fix):** the centered-logo grid trick had `.brand` (column 2) placed *before* the nav/CTA (columns 1 and 3) in the HTML. CSS Grid's auto-placement treats a "backwards" column jump as a signal to start a new row, so the logo silently landed on its own row above the nav — not visible in the review pass, only caught from a client screenshot. Fixed by adding explicit `grid-row: 1` to `.brand`, `.primary-nav__list`, `.header-cta` and `.nav-toggle` in `style.css`. Worth remembering for any future header built with this same out-of-DOM-order grid-column pattern.
 - **Packages page contrast bug (post-delivery fix):** `.pricing-card`'s default background (`rgba(255,255,255,0.04)`, meant to sit on a dark section) was placed inside a plain white `.section`, making the three non-featured cards' white/light text unreadable. Fixed by adding `section--navy` to that section (reusing the same convention as the homepage's Diferenciales block) instead of touching the card's own CSS.
 - **Site-wide low-contrast paragraph bug (post-delivery fix):** a bare `<p>` tag always matches the global rule `p { color: var(--text-on-light-muted) }` (dark gray) unless something more specific overrides it — inheriting a section's dark background color does NOT override a direct match, that's a common CSS specificity trap. Four spots relied on the section's color instead of setting their own and ended up with dark-gray-on-navy text: the secondary-page hero subtitle (`.page-hero p` — contact, services, packages), the home hero's visual-card blurb (`.hero-visual-card p`), and both the footer tagline and copyright line (`.footer-brand p`, `.footer-bottom p` — every page). Fixed by adding an explicit `color: var(--text-on-dark-muted)` to each of those four selectors in `style.css`. Good pattern to check first on any future low-contrast report: is a `<p>` (or other bare tag) relying on inherited color instead of an explicit rule for its context.
+
+---
+
+## 8. Clean URLs (Vercel)
+
+The client will host on Vercel, at least for now. `vercel.json` sets `"cleanUrls": true` and `"trailingSlash": false`: Vercel serves `services.html` when the visitor requests `/services` (no extension), and 308-redirects anyone who lands on `/services.html` to the clean version — good for SEO (no duplicate-content URLs) and no visible `.html` anywhere.
+
+Every internal link in every page (`nav`, footer, CTA buttons, service-card links) was rewritten to the extension-less, root-relative form (`href="/services"`, `href="/"` for home, anchors preserved: `href="/services#google-meta-ads"`). Canonical tags, `sitemap.xml` and `robots.txt` were updated the same way.
+
+**Important constraint for future edits:** every page loads its CSS/JS/images with a *relative* path (`assets/css/style.css`, not `/assets/css/style.css`). That only resolves correctly because `trailingSlash` is `false` — a URL like `/services` (no trailing slash) treats `services` as a file, so `assets/...` resolves back up to the site root. If anyone ever flips `trailingSlash` to `true`, every relative asset path breaks (the browser would look for `/services/assets/...`, which doesn't exist). Don't change that setting without also switching every asset reference to a root-relative path (`/assets/...`).
+
+If the domain ever moves off Vercel, this same "hide `.html` in the URL" outcome needs a different mechanism: an `.htaccess` rewrite on Apache/cPanel hosting, or a `try_files` rule on Nginx — `vercel.json` only does anything on Vercel.
